@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="pageTitle">API Key Tutorial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* 淺色背景 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+            padding: 0 1.5rem;
+            margin-top: 0;
+        }
+        .accordion-content.open {
+            max-height: 1500px;
+            padding: 1.5rem 1.5rem;
+            margin-top: -0.5rem; /* 展開時向上移動，與標題更貼合 */
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .accordion-icon.open {
+            transform: rotate(180deg);
+        }
+        .screenshot-placeholder {
+            border: 2px dashed #d1d5db;
+            background-color: #f3f4f6;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            color: #6b7280;
+            text-align: center;
+            padding: 1rem;
+        }
+        /* 【新增】自動縮放圖片的樣式 */
+        .accordion-content img {
+            max-width: 100%; /* 圖片最大寬度為容器的100% */
+            height: auto; /* 高度自動，以保持長寬比 */
+            border-radius: 0.5rem; /* 圓角 */
+            margin-top: 1rem; /* 與上方文字的間距 */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 加上陰影 */
+        }
+        .note {
+            background-color: #fefce8;
+            border-left: 4px solid #facc15;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+            color: #713f12;
+        }
+        /* Tab 切換樣式 */
+        .tab-button {
+            transition: all 0.3s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <header class="text-center mb-12">
+            <h1 id="main-title" class="text-4xl lg:text-5xl font-bold tracking-tight text-slate-900"></h1>
+            <p id="main-subtitle" class="mt-4 text-lg text-slate-500 max-w-2xl mx-auto"></p>
+        </header>
+
+        <!-- Tab 切換介面 -->
+        <div class="flex justify-between items-center border-b border-slate-200 mb-8">
+            <div class="flex space-x-8">
+                <button id="gemini-tab" class="tab-button py-4 px-1 text-lg font-medium text-slate-500 hover:text-blue-600">
+                    Google Gemini
+                </button>
+                <button id="openai-tab" class="tab-button py-4 px-1 text-lg font-medium text-slate-500 hover:text-blue-600">
+                    OpenAI
+                </button>
+            </div>
+            <select id="lang-switcher" class="w-32 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"></select>
+        </div>
+
+        <main>
+            <div id="gemini-tutorial" class="hidden space-y-4"></div>
+            <div id="openai-tutorial" class="hidden space-y-4"></div>
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const translations = {
+                'en': { 
+                    name: 'English', 
+                    data: { pageTitle: 'API Key Tutorial', screenshotPlaceholder: 'Screenshot Placeholder<br>You can replace this div with your &lt;img&gt; tag.', geminiTitle: 'How to Get a Google Gemini API Key', geminiSubtitle: 'Follow these steps to generate your key from Google AI Studio.', geminiStep1Title: 'Step 1: Go to Google AI Studio', geminiStep1Desc: 'Visit the Google AI Studio website and sign in with your Google account.', geminiStep1Link: 'Go to Google AI Studio', geminiStep2Title: 'Step 2: Select "Get API Key"', geminiStep2Desc: 'In the menu, click on "Get API Key" to navigate to the key management page.', geminiStep3Title: 'Step 3: Create a New API Key', geminiStep3Desc: 'Click the "Create API key" button. You might be asked to select a Google Cloud project.', geminiStep4Title: 'Step 4: Copy Your API Key', geminiStep4Desc: 'A new API key will be generated. Click the copy icon to copy it to your clipboard. Please store this key securely.', openaiTitle: 'How to Get an OpenAI API Key', openaiSubtitle: 'This is a complete guide, including billing setup which is required for the API to work.', openaiPart1Title: 'Part 1: Creating the API Key', openaiStep1Title: 'Step 1: Go to OpenAI API Keys Page', openaiStep1Desc: 'Visit the OpenAI Platform website and sign in or create an account.', openaiStep1Link: 'Go to OpenAI Platform', openaiStep2Title: 'Step 2: Create a New Secret Key', openaiStep2Desc: 'On the API keys page, click the "+ Create new secret key" button.', openaiStep3Title: 'Step 3: Name and Copy Your Key', openaiStep3Desc: 'Give your key a name (e.g., "LingoGo-Key") and click "Create secret key". Your new key will be displayed **only once**. Copy it immediately and save it in a safe place.', openaiPart2Title: 'Part 2: Setting Up Billing (Required)', openaiStep4Title: 'Step 4: Go to Billing Settings', openaiStep4Desc: 'In the left menu, navigate to "Settings" and then click on "Billing".', openaiStep5Title: 'Step 5: Add Payment Details', openaiStep5Desc: 'Click on "Add payment details" and fill in your billing information and credit card details. The API will not work without a valid payment method.', openaiStep5Note: 'Note: OpenAI may provide some initial free credits, but a payment method is usually required for API access.', openaiPart3Title: 'Part 3: Managing Usage Limits (Recommended)', openaiStep6Title: 'Step 6: Go to Usage Limits', openaiStep6Desc: 'In the left menu, under "Billing", click on "Usage limits".', openaiStep7Title: 'Step 7: Set a Hard Limit', openaiStep7Desc: 'It is highly recommended to set a "Hard limit" (e.g., $10) to prevent unexpected high costs. The API will stop working if the usage exceeds this limit in a month.' }
+                },
+                'zh-Hant': { 
+                    name: '繁體中文', 
+                    data: { pageTitle: 'API 金鑰申請教學', screenshotPlaceholder: '螢幕擷圖預留位置<br>您可以將此區塊替換為您的 &lt;img&gt; 標籤。', geminiTitle: '如何取得 Google Gemini API 金鑰', geminiSubtitle: '請依照以下步驟從 Google AI Studio 產生您的金鑰。', geminiStep1Title: '步驟一：前往 Google AI Studio', geminiStep1Desc: '訪問 Google AI Studio 網站並使用您的 Google 帳戶登入。', geminiStep1Link: '前往 Google AI Studio', geminiStep2Title: '步驟二：選擇「Get API Key」', geminiStep2Desc: '在左側選單中，點擊「Get API Key」以前往金鑰管理頁面。', geminiStep3Title: '步驟三：建立新的 API 金鑰', geminiStep3Desc: '點擊「Create API key」按鈕。您可能會被要求選擇一個 Google Cloud 專案。', geminiStep4Title: '步驟四：複製您的 API 金鑰', geminiStep4Desc: '系統將會產生一組新的 API 金鑰。點擊複製圖示將其複製到剪貼簿。請妥善保管此金鑰。', openaiTitle: '如何取得 OpenAI API 金鑰', openaiSubtitle: '這是完整指南，包含啟用 API 所必需的帳單設定流程。', openaiPart1Title: '第一部分：建立 API 金鑰', openaiStep1Title: '步驟一：前往 OpenAI API 金鑰頁面', openaiStep1Desc: '訪問 OpenAI Platform 網站並登入或建立帳戶。', openaiStep1Link: '前往 OpenAI Platform', openaiStep2Title: '步驟二：建立新的密鑰', openaiStep2Desc: '在 API 金鑰頁面中，點擊「+ Create new secret key」按鈕。', openaiStep3Title: '步驟三：命名並複製您的金鑰', openaiStep3Desc: '為您的金鑰取一個名稱（例如：「LingoGo-Key」），然後點擊「Create secret key」。您的新金鑰將**只會顯示一次**，請立即複製並保存在安全的地方。', openaiPart2Title: '第二部分：設定付款方式（必要）', openaiStep4Title: '步驟四：前往帳單設定', openaiStep4Desc: '在左側選單中，點擊「Settings」，然後選擇「Billing」。', openaiStep5Title: '步驟五：新增付款詳細資訊', openaiStep5Desc: '點擊「Add payment details」，並填寫您的帳單地址與信用卡資訊。若未設定有效的付款方式，API 將無法使用。', openaiStep5Note: '提醒：OpenAI 可能會提供一些初始的免費額度，但通常仍需要綁定付款方式才能啟用 API。', openaiPart3Title: '第三部分：管理用量限制（建議）', openaiStep6Title: '步驟六：前往用量限制頁面', openaiStep6Desc: '在左側選單的「Billing」下方，點擊「Usage limits」。', openaiStep7Title: '步驟七：設定強制上限', openaiStep7Desc: '強烈建議您設定一個「Hard limit」（例如 $10），以避免非預期的鉅額花費。當該月份的用量超過此上限時，API 將會自動停止運作。' }
+                }
+            };
+
+            function createAccordionItem(titleKey, descKey, options = {}) {
+                const { linkKey, linkUrl, noteKey } = options;
+                const linkButton = linkUrl ? `<a href="${linkUrl}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition-colors" data-translate="${linkKey}"></a>` : '';
+                const noteBox = noteKey ? `<div class="note" data-translate="${noteKey}"></div>` : '';
+                
+                return `
+                    <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <button class="accordion-header w-full flex justify-between items-center text-left p-6">
+                            <span class="text-lg font-semibold text-slate-800" data-translate="${titleKey}"></span>
+                            <span class="accordion-icon text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></span>
+                        </button>
+                        <div class="accordion-content bg-slate-50 border-t border-slate-200">
+                            <div>
+                                <p class="text-slate-600" data-translate="${descKey}"></p>
+                                ${noteBox}
+                                ${linkButton}
+                                <div class="screenshot-placeholder" data-translate="screenshotPlaceholder"></div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            
+            function createSectionHeader(titleKey) {
+                return `<h2 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-3 mb-6" data-translate="${titleKey}"></h2>`;
+            }
+
+            const geminiContainer = document.getElementById('gemini-tutorial');
+            geminiContainer.innerHTML = [
+                createAccordionItem('geminiStep1Title', 'geminiStep1Desc', { linkKey: 'geminiStep1Link', linkUrl: 'https://aistudio.google.com/app/apikey' }),
+                createAccordionItem('geminiStep2Title', 'geminiStep2Desc'),
+                createAccordionItem('geminiStep3Title', 'geminiStep3Desc'),
+                createAccordionItem('geminiStep4Title', 'geminiStep4Desc')
+            ].join('');
+
+            const openaiContainer = document.getElementById('openai-tutorial');
+            openaiContainer.innerHTML = [
+                createSectionHeader('openaiPart1Title'),
+                createAccordionItem('openaiStep1Title', 'openaiStep1Desc', { linkKey: 'openaiStep1Link', linkUrl: 'https://platform.openai.com/api-keys' }),
+                createAccordionItem('openaiStep2Title', 'openaiStep2Desc'),
+                createAccordionItem('openaiStep3Title', 'openaiStep3Desc'),
+                createSectionHeader('openaiPart2Title'),
+                createAccordionItem('openaiStep4Title', 'openaiStep4Desc'),
+                createAccordionItem('openaiStep5Title', 'openaiStep5Desc', { noteKey: 'openaiStep5Note' }),
+                createSectionHeader('openaiPart3Title'),
+                createAccordionItem('openaiStep6Title', 'openaiStep6Desc'),
+                createAccordionItem('openaiStep7Title', 'openaiStep7Desc')
+            ].join('');
+
+            function setLanguage(lang) {
+                const langData = translations[lang] ? translations[lang].data : translations['en'].data;
+                document.querySelectorAll('[data-translate]').forEach(el => {
+                    const key = el.getAttribute('data-translate');
+                    if (langData[key]) el.innerHTML = langData[key];
+                });
+                document.documentElement.lang = lang;
+                document.getElementById('lang-switcher').value = lang;
+                updateMainTitle(document.getElementById('gemini-tab').classList.contains('active') ? 'gemini' : 'openai');
+            }
+
+            function getInitialLanguage() {
+                const lanFromUrl = new URLSearchParams(window.location.search).get('lan');
+                if (lanFromUrl && translations[lanFromUrl]) return lanFromUrl;
+                const browserLang = (navigator.language || navigator.userLanguage).toLowerCase();
+                if (browserLang.startsWith('zh-hant') || browserLang.startsWith('zh-tw') || browserLang.startsWith('zh-hk')) return 'zh-Hant';
+                if (browserLang.startsWith('zh-hans') || browserLang.startsWith('zh-cn')) return 'zh-Hant';
+                const langPrefix = browserLang.split('-')[0];
+                return translations[langPrefix] ? langPrefix : 'en';
+            }
+
+            function updateMainTitle(apiType) {
+                const lang = document.documentElement.lang || 'en';
+                const langData = translations[lang] ? translations[lang].data : translations['en'].data;
+                const titleKey = apiType === 'openai' ? 'openaiTitle' : 'geminiTitle';
+                const subtitleKey = apiType === 'openai' ? 'openaiSubtitle' : 'geminiSubtitle';
+                document.getElementById('main-title').innerHTML = langData[titleKey] || translations['en'].data[titleKey];
+                document.getElementById('main-subtitle').innerHTML = langData[subtitleKey] || translations['en'].data[subtitleKey];
+            }
+
+            function switchTutorial(apiType) {
+                const isOpenAI = apiType === 'openai';
+                document.getElementById('gemini-tutorial').classList.toggle('hidden', isOpenAI);
+                document.getElementById('openai-tutorial').classList.toggle('hidden', !isOpenAI);
+                document.getElementById('gemini-tab').classList.toggle('active', !isOpenAI);
+                document.getElementById('openai-tab').classList.toggle('active', isOpenAI);
+                updateMainTitle(apiType);
+            }
+
+            const switcher = document.getElementById('lang-switcher');
+            Object.keys(translations).forEach(langCode => {
+                const option = document.createElement('option');
+                option.value = langCode;
+                option.textContent = translations[langCode].name;
+                switcher.appendChild(option);
+            });
+            switcher.addEventListener('change', (event) => setLanguage(event.target.value));
+
+            document.getElementById('gemini-tab').addEventListener('click', () => switchTutorial('gemini'));
+            document.getElementById('openai-tab').addEventListener('click', () => switchTutorial('openai'));
+
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.accordion-icon');
+                    content.classList.toggle('open');
+                    icon.classList.toggle('open');
+                });
+            });
+
+            const initialApiType = new URLSearchParams(window.location.search).get('APItype')?.toLowerCase() || 'gemini';
+            switchTutorial(initialApiType);
+            const initialLang = getInitialLanguage();
+            setLanguage(initialLang);
+        });
+    </script>
+</body>
+</html>
