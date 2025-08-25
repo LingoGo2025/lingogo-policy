@@ -106,7 +106,7 @@
 
     <!-- 圖片全螢幕預覽 Modal -->
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
-        <!-- 【修正】為關閉按鈕添加 z-10，確保它在最上層 -->
+        <!-- 為關閉按鈕添加 z-10，確保它在最上層 -->
         <span id="modal-close" class="absolute top-4 right-6 text-white text-5xl font-bold cursor-pointer hover:text-gray-300 z-10">&times;</span>
         <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
             <img id="modal-image" src="" alt="Full screen image" class="max-w-full max-h-full">
@@ -128,11 +128,14 @@
             };
 
             function createAccordionItem(titleKey, descKey, options = {}) {
-                const { linkKey, linkUrl, noteKey, imageId } = options;
+                const { linkKey, linkUrl, noteKey, imageId, imgSrc } = options; 
                 const linkButton = linkUrl ? `<a href="${linkUrl}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition-colors" data-translate="${linkKey}"></a>` : '';
                 const noteBox = noteKey ? `<div class="note" data-translate="${noteKey}"></div>` : '';
-                // 使用實際的圖片標籤取代預留位置
-                const imageTag = `<img src="https://placehold.co/800x500/e2e8f0/334155?text=Step+${imageId}" alt="Step ${imageId} Screenshot" class="zoomable-image">`;
+                
+                // 如果提供了 imgSrc，就使用它；否則，使用預留位置
+                const finalImgSrc = imgSrc || `https://placehold.co/800x500/e2e8f0/334155?text=Step+${imageId}`;
+                const imageTag = `<img src="${finalImgSrc}" alt="Step ${imageId} Screenshot" class="zoomable-image" onerror="this.onerror=null;this.src='https://placehold.co/800x500/fecaca/991b1b?text=Image+Not+Found';">`;
+
 
                 return `
                     <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
@@ -157,24 +160,26 @@
 
             const geminiContainer = document.getElementById('gemini-tutorial');
             geminiContainer.innerHTML = [
-                createAccordionItem('geminiStep1Title', 'geminiStep1Desc', { linkKey: 'geminiStep1Link', linkUrl: 'https://aistudio.google.com/app/apikey', imageId: 'G1' }),
-                createAccordionItem('geminiStep2Title', 'geminiStep2Desc', { imageId: 'G2' }),
-                createAccordionItem('geminiStep3Title', 'geminiStep3Desc', { imageId: 'G3' }),
-                createAccordionItem('geminiStep4Title', 'geminiStep4Desc', { imageId: 'G4' })
+                // 【更新】為所有 Gemini 圖片傳入 imgSrc 參數
+                createAccordionItem('geminiStep1Title', 'geminiStep1Desc', { linkKey: 'geminiStep1Link', linkUrl: 'https://aistudio.google.com/app/apikey', imageId: 'G1', imgSrc: 'G1.jpg' }),
+                createAccordionItem('geminiStep2Title', 'geminiStep2Desc', { imageId: 'G2', imgSrc: 'G2.jpg' }),
+                createAccordionItem('geminiStep3Title', 'geminiStep3Desc', { imageId: 'G3', imgSrc: 'G3.jpg' }),
+                createAccordionItem('geminiStep4Title', 'geminiStep4Desc', { imageId: 'G4', imgSrc: 'G4.jpg' })
             ].join('');
 
             const openaiContainer = document.getElementById('openai-tutorial');
             openaiContainer.innerHTML = [
+                // 【更新】為所有 OpenAI 圖片傳入 imgSrc 參數
                 createSectionHeader('openaiPart1Title'),
-                createAccordionItem('openaiStep1Title', 'openaiStep1Desc', { linkKey: 'openaiStep1Link', linkUrl: 'https://platform.openai.com/api-keys', imageId: 'O1' }),
-                createAccordionItem('openaiStep2Title', 'openaiStep2Desc', { imageId: 'O2' }),
-                createAccordionItem('openaiStep3Title', 'openaiStep3Desc', { imageId: 'O3' }),
+                createAccordionItem('openaiStep1Title', 'openaiStep1Desc', { linkKey: 'openaiStep1Link', linkUrl: 'https://platform.openai.com/api-keys', imageId: 'O1', imgSrc: 'O1.jpg' }),
+                createAccordionItem('openaiStep2Title', 'openaiStep2Desc', { imageId: 'O2', imgSrc: 'O2.jpg' }),
+                createAccordionItem('openaiStep3Title', 'openaiStep3Desc', { imageId: 'O3', imgSrc: 'O3.jpg' }),
                 createSectionHeader('openaiPart2Title'),
-                createAccordionItem('openaiStep4Title', 'openaiStep4Desc', { imageId: 'O4' }),
-                createAccordionItem('openaiStep5Title', 'openaiStep5Desc', { noteKey: 'openaiStep5Note', imageId: 'O5' }),
+                createAccordionItem('openaiStep4Title', 'openaiStep4Desc', { imageId: 'O4', imgSrc: 'O4.jpg' }),
+                createAccordionItem('openaiStep5Title', 'openaiStep5Desc', { noteKey: 'openaiStep5Note', imageId: 'O5', imgSrc: 'O5.jpg' }),
                 createSectionHeader('openaiPart3Title'),
-                createAccordionItem('openaiStep6Title', 'openaiStep6Desc', { imageId: 'O6' }),
-                createAccordionItem('openaiStep7Title', 'openaiStep7Desc', { imageId: 'O7' })
+                createAccordionItem('openaiStep6Title', 'openaiStep6Desc', { imageId: 'O6', imgSrc: 'O6.jpg' }),
+                createAccordionItem('openaiStep7Title', 'openaiStep7Desc', { imageId: 'O7', imgSrc: 'O7.jpg' })
             ].join('');
             
             // --- 頁面翻譯與 Tab 切換邏輯 (與之前相同) ---
@@ -238,7 +243,7 @@
                 });
             });
 
-            // --- 新增：圖片燈箱 (Modal) 互動邏輯 ---
+            // --- 圖片燈箱 (Modal) 互動邏輯 ---
             const modal = document.getElementById('image-modal');
             const modalImg = document.getElementById('modal-image');
             const closeBtn = document.getElementById('modal-close');
@@ -269,10 +274,11 @@
                 setTransform();
             }
 
-            document.querySelectorAll('.zoomable-image').forEach(image => {
-                image.addEventListener('click', function() {
-                    openModal(this.src);
-                });
+            // 動態綁定事件，確保新載入的圖片也能觸發
+            document.querySelector('main').addEventListener('click', function(e) {
+                if (e.target.classList.contains('zoomable-image')) {
+                    openModal(e.target.src);
+                }
             });
 
             closeBtn.addEventListener('click', closeModal);
