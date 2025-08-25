@@ -31,26 +31,15 @@
         .accordion-icon.open {
             transform: rotate(180deg);
         }
-        .screenshot-placeholder {
-            border: 2px dashed #d1d5db;
-            background-color: #f3f4f6;
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* 自動縮放圖片的樣式 */
+        .zoomable-image {
+            max-width: 100%;
+            height: auto;
             border-radius: 0.5rem;
             margin-top: 1rem;
-            color: #6b7280;
-            text-align: center;
-            padding: 1rem;
-        }
-        /* 自動縮放圖片的樣式 */
-        .accordion-content img {
-            max-width: 100%; /* 圖片最大寬度為容器的100% */
-            height: auto; /* 高度自動，以保持長寬比 */
-            border-radius: 0.5rem; /* 圓角 */
-            margin-top: 1rem; /* 與上方文字的間距 */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 加上陰影 */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            cursor: zoom-in;
+            transition: transform 0.2s ease-in-out;
         }
         .note {
             background-color: #fefce8;
@@ -69,6 +58,17 @@
         .tab-button.active {
             color: #2563eb;
             border-bottom-color: #2563eb;
+        }
+        /* 圖片燈箱 Modal 樣式 */
+        #image-modal {
+            cursor: zoom-out;
+        }
+        #modal-image {
+            cursor: grab;
+            transition: transform 0.2s ease-out;
+        }
+        #modal-image.dragging {
+            cursor: grabbing;
         }
     </style>
 </head>
@@ -104,6 +104,16 @@
 
     </div>
 
+    <!-- 圖片全螢幕預覽 Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
+        <!-- 【修正】為關閉按鈕添加 z-10，確保它在最上層 -->
+        <span id="modal-close" class="absolute top-4 right-6 text-white text-5xl font-bold cursor-pointer hover:text-gray-300 z-10">&times;</span>
+        <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <img id="modal-image" src="" alt="Full screen image" class="max-w-full max-h-full">
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const translations = {
@@ -118,10 +128,12 @@
             };
 
             function createAccordionItem(titleKey, descKey, options = {}) {
-                const { linkKey, linkUrl, noteKey } = options;
+                const { linkKey, linkUrl, noteKey, imageId } = options;
                 const linkButton = linkUrl ? `<a href="${linkUrl}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition-colors" data-translate="${linkKey}"></a>` : '';
                 const noteBox = noteKey ? `<div class="note" data-translate="${noteKey}"></div>` : '';
-                
+                // 使用實際的圖片標籤取代預留位置
+                const imageTag = `<img src="https://placehold.co/800x500/e2e8f0/334155?text=Step+${imageId}" alt="Step ${imageId} Screenshot" class="zoomable-image">`;
+
                 return `
                     <div class="accordion-item bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                         <button class="accordion-header w-full flex justify-between items-center text-left p-6">
@@ -133,7 +145,7 @@
                                 <p class="text-slate-600" data-translate="${descKey}"></p>
                                 ${noteBox}
                                 ${linkButton}
-                                <div class="screenshot-placeholder" data-translate="screenshotPlaceholder"></div>
+                                ${imageTag}
                             </div>
                         </div>
                     </div>`;
@@ -145,26 +157,27 @@
 
             const geminiContainer = document.getElementById('gemini-tutorial');
             geminiContainer.innerHTML = [
-                createAccordionItem('geminiStep1Title', 'geminiStep1Desc', { linkKey: 'geminiStep1Link', linkUrl: 'https://aistudio.google.com/app/apikey' }),
-                createAccordionItem('geminiStep2Title', 'geminiStep2Desc'),
-                createAccordionItem('geminiStep3Title', 'geminiStep3Desc'),
-                createAccordionItem('geminiStep4Title', 'geminiStep4Desc')
+                createAccordionItem('geminiStep1Title', 'geminiStep1Desc', { linkKey: 'geminiStep1Link', linkUrl: 'https://aistudio.google.com/app/apikey', imageId: 'G1' }),
+                createAccordionItem('geminiStep2Title', 'geminiStep2Desc', { imageId: 'G2' }),
+                createAccordionItem('geminiStep3Title', 'geminiStep3Desc', { imageId: 'G3' }),
+                createAccordionItem('geminiStep4Title', 'geminiStep4Desc', { imageId: 'G4' })
             ].join('');
 
             const openaiContainer = document.getElementById('openai-tutorial');
             openaiContainer.innerHTML = [
                 createSectionHeader('openaiPart1Title'),
-                createAccordionItem('openaiStep1Title', 'openaiStep1Desc', { linkKey: 'openaiStep1Link', linkUrl: 'https://platform.openai.com/api-keys' }),
-                createAccordionItem('openaiStep2Title', 'openaiStep2Desc'),
-                createAccordionItem('openaiStep3Title', 'openaiStep3Desc'),
+                createAccordionItem('openaiStep1Title', 'openaiStep1Desc', { linkKey: 'openaiStep1Link', linkUrl: 'https://platform.openai.com/api-keys', imageId: 'O1' }),
+                createAccordionItem('openaiStep2Title', 'openaiStep2Desc', { imageId: 'O2' }),
+                createAccordionItem('openaiStep3Title', 'openaiStep3Desc', { imageId: 'O3' }),
                 createSectionHeader('openaiPart2Title'),
-                createAccordionItem('openaiStep4Title', 'openaiStep4Desc'),
-                createAccordionItem('openaiStep5Title', 'openaiStep5Desc', { noteKey: 'openaiStep5Note' }),
-                createSectionHeader('part3Title'),
-                createAccordionItem('openaiStep6Title', 'openaiStep6Desc'),
-                createAccordionItem('openaiStep7Title', 'openaiStep7Desc')
+                createAccordionItem('openaiStep4Title', 'openaiStep4Desc', { imageId: 'O4' }),
+                createAccordionItem('openaiStep5Title', 'openaiStep5Desc', { noteKey: 'openaiStep5Note', imageId: 'O5' }),
+                createSectionHeader('openaiPart3Title'),
+                createAccordionItem('openaiStep6Title', 'openaiStep6Desc', { imageId: 'O6' }),
+                createAccordionItem('openaiStep7Title', 'openaiStep7Desc', { imageId: 'O7' })
             ].join('');
-
+            
+            // --- 頁面翻譯與 Tab 切換邏輯 (與之前相同) ---
             function setLanguage(lang) {
                 const langData = translations[lang] ? translations[lang].data : translations['en'].data;
                 document.querySelectorAll('[data-translate]').forEach(el => {
@@ -224,6 +237,85 @@
                     icon.classList.toggle('open');
                 });
             });
+
+            // --- 新增：圖片燈箱 (Modal) 互動邏輯 ---
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            const closeBtn = document.getElementById('modal-close');
+
+            let scale = 1;
+            let panning = false;
+            let pointX = 0;
+            let pointY = 0;
+            let start = { x: 0, y: 0 };
+
+            function setTransform() {
+                modalImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+            }
+
+            function openModal(src) {
+                modalImg.setAttribute('src', src);
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // 恢復背景滾動
+                // 重設圖片狀態
+                scale = 1;
+                pointX = 0;
+                pointY = 0;
+                setTransform();
+            }
+
+            document.querySelectorAll('.zoomable-image').forEach(image => {
+                image.addEventListener('click', function() {
+                    openModal(this.src);
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) { // 只有在點擊背景時才關閉
+                    closeModal();
+                }
+            });
+
+            modalImg.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                panning = true;
+                modalImg.classList.add('dragging');
+                start = { x: e.clientX - pointX, y: e.clientY - pointY };
+            });
+
+            window.addEventListener('mouseup', function() {
+                panning = false;
+                modalImg.classList.remove('dragging');
+            });
+
+            window.addEventListener('mousemove', function(e) {
+                if (!panning) return;
+                pointX = e.clientX - start.x;
+                pointY = e.clientY - start.y;
+                setTransform();
+            });
+
+            modalImg.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const xs = (e.clientX - pointX) / scale;
+                const ys = (e.clientY - pointY) / scale;
+                const delta = -e.deltaY;
+
+                (delta > 0) ? (scale *= 1.1) : (scale /= 1.1);
+                scale = Math.min(Math.max(0.5, scale), 5); // 限制縮放比例
+
+                pointX = e.clientX - xs * scale;
+                pointY = e.clientY - ys * scale;
+                
+                setTransform();
+            });
+
 
             const initialApiType = new URLSearchParams(window.location.search).get('APItype')?.toLowerCase() || 'gemini';
             switchTutorial(initialApiType);
