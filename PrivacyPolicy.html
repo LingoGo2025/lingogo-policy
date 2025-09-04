@@ -49,11 +49,24 @@
 <body class="bg-slate-50 text-slate-800">
 
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-end pt-4">
-            <select id="lang-switcher" class="w-40 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+        <!-- 結合 Logo、標題和語言切換器 -->
+        <div class="flex justify-between items-center pt-8 pb-8">
+            <!-- Logo 和標題 -->
+            <div class="flex items-center space-x-4">
+                <!-- 調整 logo 圖片來源和尺寸 -->
+                <img src="logo_noback.jpg" alt="LingoGo Logo" class="h-12 w-12 rounded-lg">
+                <header>
+                    <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-900" data-translate="headerTitle">LingoGo Privacy Policy</h1>
+                    <p class="mt-2 text-md text-slate-500" data-translate="lastUpdated">Last Updated: August 13, 2025</p>
+                </header>
+            </div>
+            <!-- 語言切換器 -->
+            <div class="flex-shrink-0">
+                <select id="lang-switcher" class="w-40 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                 </select>
+            </div>
         </div>
-
+        
         <div class="lg:flex lg:space-x-12 py-12 lg:py-16">
             
             <aside class="lg:w-1/4 lg:sticky lg:top-16 self-start mb-10 lg:mb-0">
@@ -89,11 +102,6 @@
             </aside>
 
             <main class="flex-1 prose-custom">
-                <header class="mb-12">
-                    <h1 class="text-4xl lg:text-5xl font-bold tracking-tight text-slate-900" data-translate="headerTitle">LingoGo Privacy Policy</h1>
-                    <p class="mt-4 text-lg text-slate-500" data-translate="lastUpdated">Last Updated: August 13, 2025</p>
-                </header>
-
                 <div class="space-y-16">
                     <section id="section-1">
                         <h2 class="text-2xl font-bold text-slate-900 border-b pb-2 mb-6" data-translate="s1Title">1. Introduction & Contact</h2>
